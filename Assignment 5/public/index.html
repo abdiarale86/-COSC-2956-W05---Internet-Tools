@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Image App</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 30px;
+      background-color: #f4f4f4;
+    }
+
+    .box {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      width: 500px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px #ccc;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    button:hover {
+      background-color: #388e3c;
+    }
+
+    img {
+      width: 300px;
+      border: 1px solid #ccc;
+      display: block;
+      margin-top: 15px;
+    }
+
+    #message {
+      font-weight: bold;
+      color: darkgreen;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="box">
+    <h2>Search for an Image</h2>
+
+    <input id="searchName" type="text" placeholder="Type tom, jerry, or dog">
+    <button onclick="searchImage()">Show Image</button>
+
+    <img id="imgBox" src="default.png" alt="Image will appear here">
+  </div>
+
+  <div class="box">
+    <h2>Upload and Replace an Image</h2>
+
+    <input id="uploadName" type="text" placeholder="Enter tom, jerry, or dog">
+    <input id="fileInput" type="file" accept="image/*">
+    <button onclick="uploadImage()">Upload Image</button>
+
+    <p id="message"></p>
+  </div>
+
+  <script>
+    async function searchImage() {
+      const text = document.getElementById("searchName").value;
+
+      const res = await fetch(`/api/getImage?name=${encodeURIComponent(text)}`);
+      const data = await res.json();
+
+      document.getElementById("imgBox").src = data.image + "?t=" + new Date().getTime();
+    }
+
+    async function uploadImage() {
+      const name = document.getElementById("uploadName").value;
+      const file = document.getElementById("fileInput").files[0];
+      const message = document.getElementById("message");
+
+      if (!name) {
+        message.innerText = "Please enter tom, jerry, or dog.";
+        return;
+      }
+
+      if (!file) {
+        message.innerText = "Please choose a file.";
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("image", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+      message.innerText = data.message;
+    }
+  </script>
+
+</body>
+</html>
